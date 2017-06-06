@@ -1,0 +1,30 @@
+{
+  "name": "jittaintern",
+  "version": "1.0.0",
+  "description": "internship in jitta",
+  "main": "server.js",
+  "scripts": {
+    "test": "mocha",
+    "coverage": "istanbul cover node_modules/.bin/_mocha",
+    "cron-google": "URL=https://google.com DESTINATION_URL=http://localhost:3000/books node index.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "chai": "^4.0.1",
+    "chai-http": "^3.0.0",
+    "eslint": "^3.19.0",
+    "eslint-config-airbnb": "^14.1.0",
+    "eslint-plugin-import": "^2.2.0",
+    "eslint-plugin-jsx-a11y": "^4.0.0",
+    "eslint-plugin-react": "^6.10.0",
+    "mocha": "^3.4.2",
+    "nodemon": "^1.11.0"
+  },
+  "dependencies": {
+    "async": "^2.4.1",
+    "chai": "^4.0.1",
+    "cron": "^1.2.1",
+    "mocha": "^3.4.2"
+  }
+}
