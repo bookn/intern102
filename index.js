@@ -9,5 +9,6 @@ const crawling = new Crawling({
   retryTimes: config.retryTimes
 })
 
-crawling.jobStart()
-
+crawling.createJob(() => {
+  crawling.jobStart()
+})

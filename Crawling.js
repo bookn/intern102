@@ -4,15 +4,12 @@ const url = require('url')
 const async = require('async')
 
 class Crawling {
-  constructor({ urlString, urlDestString, cronMinute }) {
+  constructor({ urlString, urlDestString, cronMinute, intervalMillisec, retryTimes }) {
     this.urlString = urlString
     this.urlDestString = urlDestString
     this.cronMinute = cronMinute
-    this.setAsyncRetry()
-  }
-  setAsyncRetry() {
-    this.intervalMillisec = process.env.RETRY_INTERVAL || 3000
-    this.retryTimes = process.env.RETRY_TIMES || 5
+    this.intervalMillisec = intervalMillisec
+    this.retryTimes = retryTimes
   }
   getOpts(strUrl) {
     const parsedurl = url.parse(strUrl)
@@ -67,7 +64,7 @@ class Crawling {
       }
     })
   }
-  createJob() {
+  createJob(callback) {
     this.job = new cron.CronJob({
       cronTime: `0 */${this.cronMinute} * * * *`,
       onTick: () => {
@@ -76,6 +73,7 @@ class Crawling {
       start: false,
       timeZone: 'Asia/Bangkok'
     })
+    if (callback) callback()
   }
   jobStart() {
     this.job.start()
