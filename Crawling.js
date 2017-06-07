@@ -3,15 +3,13 @@ const http = require('http')
 const url = require('url')
 const async = require('async')
 
-const config = require('./config')
-
-const INTERVAL = 1000
-const RETRY = 3
-
 class Crawling {
-  constructor({ urlString, urlDestString }) {
+  constructor({ urlString, urlDestString, cronMinute, intervalMillisec, retryTimes }) {
     this.urlString = urlString
     this.urlDestString = urlDestString
+    this.cronMinute = cronMinute
+    this.intervalMillisec = intervalMillisec
+    this.retryTimes = retryTimes
   }
   getOpts(strUrl) {
     const parsedurl = url.parse(strUrl)
@@ -25,7 +23,7 @@ class Crawling {
     return options
   }
   scrape() {
-    async.retry({ times: RETRY, interval: INTERVAL }, (callback) => {
+    async.retry({ times: this.retryTimes, interval: this.intervalMillisec }, (callback) => {
       const options = this.getOpts(this.urlString)
       const req = http.request(options, (res) => {
         if (res.statusCode === 200) {
@@ -44,29 +42,44 @@ class Crawling {
       if (err) {
         const options = this.getOpts(this.urlDestString)
         const reqDest = http.request(options, (resDest) => {
-          if (resDest.statusCode === 200) console.log(`Change destination to ${this.urlDestString} success !`)
-          else console.log(`Cannot change destination to ${this.urlDestString} !`)
+          if (resDest.statusCode === 200) {
+            this.completeDestination = true
+            console.log(`Change destination to ${this.urlDestString} success !`)
+          }
+          else {
+            this.completeDestination = false
+            console.log(`Cannot change destination to ${this.urlDestString} !`)
+          }
         })
         reqDest.on('error', () => {
-          console.log('Cannot connect to destination')
+          this.completeDestination = false
+          console.log(`Error, cannot change destination to ${this.urlDestString} !`)
         })
         console.log(err.messege)
+        this.error = err.messege
         reqDest.end()
       } else {
         console.log(result)
+        this.result = result.messege
       }
     })
   }
-  jobStart() {
-    const job = new cron.CronJob({
-      cronTime: `0 */${config.cronMinute} * * * *`,
+  createJob(callback) {
+    this.job = new cron.CronJob({
+      cronTime: `0 */${this.cronMinute} * * * *`,
       onTick: () => {
         this.scrape(this.urlString, this.urlDestString)
       },
       start: false,
       timeZone: 'Asia/Bangkok'
     })
-    job.start()
+    if (callback) callback()
+  }
+  jobStart() {
+    this.job.start()
+  }
+  jobStop() {
+    this.job.stop()
   }
 }
 module.exports = Crawling
